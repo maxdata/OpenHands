@@ -26,7 +26,6 @@ build:
 	@$(MAKE) -s install-python-dependencies
 	@$(MAKE) -s install-frontend-dependencies
 	@$(MAKE) -s install-pre-commit-hooks
-	@$(MAKE) -s build-frontend
 	@echo "$(GREEN)Build completed successfully.$(RESET)"
 
 check-dependencies:
@@ -64,31 +63,6 @@ check-python:
 		echo "$(BLUE)$(shell python$(PYTHON_VERSION) --version) is already installed.$(RESET)"; \
 	else \
 		echo "$(RED)Python $(PYTHON_VERSION) is not installed. Please install Python $(PYTHON_VERSION) to continue.$(RESET)"; \
-		exit 1; \
-	fi
-
-check-npm:
-	@echo "$(YELLOW)Checking npm installation...$(RESET)"
-	@if command -v npm > /dev/null; then \
-		echo "$(BLUE)npm $(shell npm --version) is already installed.$(RESET)"; \
-	else \
-		echo "$(RED)npm is not installed. Please install Node.js to continue.$(RESET)"; \
-		exit 1; \
-	fi
-
-check-nodejs:
-	@echo "$(YELLOW)Checking Node.js installation...$(RESET)"
-	@if command -v node > /dev/null; then \
-		NODE_VERSION=$(shell node --version | sed -E 's/v//g'); \
-		IFS='.' read -r -a NODE_VERSION_ARRAY <<< "$$NODE_VERSION"; \
-		if [ "$${NODE_VERSION_ARRAY[0]}" -ge 22 ]; then \
-			echo "$(BLUE)Node.js $$NODE_VERSION is already installed.$(RESET)"; \
-		else \
-			echo "$(RED)Node.js 22.x or later is required. Please install Node.js 22.x or later to continue.$(RESET)"; \
-			exit 1; \
-		fi; \
-	else \
-		echo "$(RED)Node.js is not installed. Please install Node.js to continue.$(RESET)"; \
 		exit 1; \
 	fi
 
@@ -150,14 +124,6 @@ install-python-dependencies:
 	fi
 	@echo "$(GREEN)Python dependencies installed successfully.$(RESET)"
 
-install-frontend-dependencies:
-	@echo "$(YELLOW)Setting up frontend environment...$(RESET)"
-	@echo "$(YELLOW)Detect Node.js version...$(RESET)"
-	@cd frontend && node ./scripts/detect-node-version.js
-	echo "$(BLUE)Installing frontend dependencies with npm...$(RESET)"
-	@cd frontend && npm install
-	@echo "$(GREEN)Frontend dependencies installed successfully.$(RESET)"
-
 install-pre-commit-hooks:
 	@echo "$(YELLOW)Installing pre-commit hooks...$(RESET)"
 	@git config --unset-all core.hooksPath || true
@@ -174,19 +140,7 @@ lint-frontend:
 
 lint:
 	@$(MAKE) -s lint-frontend
-	@$(MAKE) -s lint-backend
-
-test-frontend:
-	@echo "$(YELLOW)Running tests for frontend...$(RESET)"
-	@cd frontend && npm run test
-
-test:
-	@$(MAKE) -s test-frontend
-
-build-frontend:
-	@echo "$(YELLOW)Building frontend...$(RESET)"
-	@cd frontend && npm run build
-
+	
 # Start backend
 start-backend:
 	@echo "$(YELLOW)Starting backend...$(RESET)"
